@@ -1,0 +1,31 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64"  # Utiliza la imagen de Ubuntu Xenial 64-bit
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024"  # Asigna 1 GB de memoria a la máquina virtual
+    vb.cpus = 1  # Asigna 1 CPU a la máquina virtual
+  end
+
+  # Configuración adicional de Vagrant, si es necesario
+
+  # Configuración de red para acceder a la máquina virtual desde el host
+  config.vm.network "forwarded_port", guest: 22, host: 2222  # Redirige el puerto SSH de la máquina virtual al puerto 2222 de la máquina anfitriona
+  config.vm.network "private_network", ip: "192.168.33.10"  # Asigna una dirección IP privada a la máquina virtual
+
+  # Aprovisionamiento personalizado para permitir conexiones SSH desde Mobaxterm
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+    sudo systemctl restart sshd
+
+
+  # Configurar el teclado en inglés americano
+    sudo sed -i 's/XKBLAYOUT="us"/XKBLAYOUT="us"\nXKBVARIANT="intl"/g' /etc/default/keyboard
+    sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+    sudo service keyboard-setup restart
+
+  # Instala el ifconfig 
+    sudo apt-get update
+    sudo apt-get install -y net-tools
+
+  SHELL
+end
